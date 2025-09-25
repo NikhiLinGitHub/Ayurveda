@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayurvedic Herb Traceability</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fc;
+            color: #1a202c;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1), 0 0px 10px -5px rgba(0, 0, 0, 0.04);
+            padding: 2rem;
+            border: 1px solid #e2e8f0;
+        }
+        .section-title {
+            color: #2c5282;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        .provenance-event {
+            border-left: 4px solid #4299e1;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        .provenance-event:before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 0.5rem;
+            width: 14px;
+            height: 14px;
+            background-color: #4299e1;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+        }
+        .provenance-event h4 {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 0.25rem;
+        }
+        .event-collection { border-color: #38a169; }
+        .event-collection:before { background-color: #38a169; }
+        .event-processing { border-color: #4299e1; }
+        .event-processing:before { background-color: #4299e1; }
+        .event-quality-test { border-color: #ed8936; }
+        .event-quality-test:before { background-color: #ed8936; }
+        .event-packaging { border-color: #c05621; }
+        .event-packaging:before { background-color: #c05621; }
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mx-auto p-4 md:p-8">
+    <div class="text-center mb-10">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-2">Ayurvedic Herb Traceability</h1>
+        <p class="text-xl text-gray-600">Blockchain-based provenance simulation</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="card">
+            <h2 class="section-title text-2xl">1. Supplier: Add New Herb Batch</h2>
+            <form id="supplierForm" class="space-y-4">
+                <div>
+                    <label for="herbName" class="block text-sm font-medium text-gray-700">Herb Name</label>
+                    <input type="text" id="herbName" name="herbName" required placeholder="e.g., Ashwagandha"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity (kg)</label>
+                    <input type="number" id="quantity" name="quantity" required placeholder="e.g., 50"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="location" class="block text-sm font-medium text-gray-700">Collection Location</label>
+                    <input type="text" id="location" name="location" required placeholder="e.g., Satpura Hills, MP, India"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    Add New Batch
+                </button>
+            </form>
+            <div id="supplierOutput" class="mt-6 p-4 bg-gray-100 rounded-lg hidden">
+                <p class="text-sm font-medium text-gray-700">New batch added. Share this unique ID:</p>
+                <div class="flex items-center mt-2">
+                    <span id="productID" class="text-lg font-mono text-gray-900 bg-white p-2 rounded-md border border-gray-300 flex-grow mr-2"></span>
+                    <button id="copyBtn" class="p-2 bg-gray-300 rounded-md hover:bg-gray-400 transition-colors" title="Copy to Clipboard">
+                        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v2M8 5a2 2 0 002 2h2a2 0 002-2m-3 8a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="supplierMessage" class="mt-4 text-sm font-medium text-center hidden"></div>
+        </div>
+
+        <div class="card">
+            <h2 class="section-title text-2xl">2. Processor & Lab: Update Batch</h2>
+            <form id="processorForm" class="space-y-4">
+                <div>
+                    <label for="processorID" class="block text-sm font-medium text-gray-700">Product ID</label>
+                    <input type="text" id="processorID" name="processorID" required placeholder="e.g., PROD-7A9B"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="eventType" class="block text-sm font-medium text-gray-700">Event Type</label>
+                    <select id="eventType" name="eventType" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="ProcessingStep">Processing Step</option>
+                        <option value="QualityTest">Quality Test</option>
+                    </select>
+                </div>
+                <div id="processingFields" class="space-y-4">
+                    <div>
+                        <label for="processingStep" class="block text-sm font-medium text-gray-700">Step</label>
+                        <input type="text" id="processingStep" name="processingStep" placeholder="e.g., Drying, Grinding"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="facility" class="block text-sm font-medium text-gray-700">Facility</label>
+                        <input type="text" id="facility" name="facility" placeholder="e.g., Shanti Herbal Processors"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <div id="qualityFields" class="space-y-4 hidden">
+                    <div>
+                        <label for="lab" class="block text-sm font-medium text-gray-700">Laboratory</label>
+                        <input type="text" id="lab" name="lab" placeholder="e.g., Purity Labs"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="moisture" class="block text-sm font-medium text-gray-700">Moisture (%)</label>
+                        <input type="number" id="moisture" name="moisture" placeholder="e.g., 7.5" step="0.1"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-colors">
+                    Add Event to Batch
+                </button>
+            </form>
+            <div id="processorOutput" class="mt-6 p-4 bg-gray-100 rounded-lg hidden">
+                <p class="text-sm font-medium text-gray-700">Event added for Product ID:</p>
+                <div class="flex items-center mt-2">
+                    <span id="processorProductID" class="text-lg font-mono text-gray-900 bg-white p-2 rounded-md border border-gray-300 flex-grow mr-2"></span>
+                    <button id="processorCopyBtn" class="p-2 bg-gray-300 rounded-md hover:bg-gray-400 transition-colors" title="Copy to Clipboard">
+                        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v2M8 5a2 2 0 002 2h2a2 0 002-2m-3 8a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="processorMessage" class="mt-4 text-sm font-medium text-center hidden"></div>
+        </div>
+
+        <div class="card lg:col-span-2">
+            <h2 class="section-title text-2xl">3. Consumer: View Provenance</h2>
+            <div class="space-y-4">
+                <p class="text-sm text-gray-600">Enter a Product ID to view its complete provenance record.</p>
+                <div>
+                    <label for="consumerID" class="block text-sm font-medium text-gray-700">Product ID</label>
+                    <input type="text" id="consumerID" name="consumerID" placeholder="e.g., PROD-7A9B"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <button id="scanBtn" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                    View Provenance
+                </button>
+            </div>
+            <div id="consumerOutput" class="mt-6 p-4 bg-white rounded-lg hidden">
+                <h3 class="text-xl font-bold text-gray-800 mb-4" id="outputTitle"></h3>
+                <div id="provenanceHistory" class="space-y-4"></div>
+                <div id="qrcode" class="hidden"></div>
+                <p id="qrHelpText" class="text-center text-sm text-gray-500 mt-2 hidden">Scan this QR code to download the Certificate of Originality.</p>
+                <div id="notFoundMessage" class="hidden text-red-500 text-center font-medium">Product ID not found. Please check the ID and try again.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="mt-8 py-4 text-center text-gray-500 text-sm border-t border-gray-200">
+    <p>© 2024 AyurTrace. All rights reserved.</p>
+    <p>Made With ❤ By Himanshu Mishra</p>
+</footer>
+
+<script>
+    // --- SIMULATED BLOCKCHAIN LEDGER ---
+    const database = {
+        'PROD-7A9B': [
+            { type: 'CollectionEvent', timestamp: new Date('2024-05-10T09:30:00Z').toISOString(), data: { herbName: 'Ashwagandha', quantity: 50, location: 'Satpura Hills, MP, India', collector: 'Farmer Cooperative A' }},
+            { type: 'ProcessingStep', timestamp: new Date('2024-05-11T14:00:00Z').toISOString(), data: { step: 'Drying', facility: 'Shanti Herbal Processors' }},
+            { type: 'QualityTest', timestamp: new Date('2024-05-15T11:00:00Z').toISOString(), data: { lab: 'Purity Labs', results: { moisture: '7%', pesticides: 'Negative' }, certificateID: 'CERT-001' }},
+            { type: 'ProcessingStep', timestamp: new Date('2024-05-16T16:00:00Z').toISOString(), data: { step: 'Grinding and Packaging', facility: 'Shanti Herbal Processors' }},
+            { type: 'PackagingEvent', timestamp: new Date('2024-05-17T10:00:00Z').toISOString(), data: { productBatch: 'ASH-2024-B1', qrCodeGenerated: true }},
+        ],
+        'PROD-C4D3': [
+            { type: 'CollectionEvent', timestamp: new Date('2024-04-20T11:45:00Z').toISOString(), data: { herbName: 'Brahmi', quantity: 25, location: 'Western Ghats, Maharashtra, India', collector: 'Wild Collector Group' }},
+            { type: 'QualityTest', timestamp: new Date('2024-04-25T09:00:00Z').toISOString(), data: { lab: 'PhytoVerify India', results: { dnaBarcode: '99% Match', heavyMetals: 'Negative' }, certificateID: 'CERT-002' }},
+            { type: 'ProcessingStep', timestamp: new Date('2024-04-26T15:30:00Z').toISOString(), data: { step: 'Washing and Extraction', facility: 'AyurFormulations Co.' }},
+            { type: 'PackagingEvent', timestamp: new Date('2024-04-28T14:00:00Z').toISOString(), data: { productBatch: 'BRM-2024-C3', qrCodeGenerated: true }},
+        ]
+    };
+
+    // --- UTILITY FUNCTIONS ---
+    function generateUUID() {
+        return PROD-${Math.random().toString(16).substr(2, 4).toUpperCase()};
+    }
+
+    function formatDate(isoString) {
+        const date = new Date(isoString);
+        return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString();
+    }
+    
+    function copyToClipboard(text) {
+        const tempInput = document.createElement('textarea');
+        tempInput.value = text;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+    }
+    
+    function showMessage(element, message, isError = false) {
+        element.textContent = message;
+        element.classList.remove('hidden');
+        element.style.color = isError ? 'red' : 'green';
+        setTimeout(() => element.classList.add('hidden'), 3000);
+    }
+
+    // --- SUPPLIER LOGIC ---
+    const supplierForm = document.getElementById('supplierForm');
+    const supplierOutput = document.getElementById('supplierOutput');
+    const productIDSpan = document.getElementById('productID');
+    const copyBtn = document.getElementById('copyBtn');
+    const supplierMessage = document.getElementById('supplierMessage');
+
+    supplierForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const formData = new FormData(supplierForm);
+        const herbName = formData.get('herbName');
+        const quantity = parseFloat(formData.get('quantity'));
+        const location = formData.get('location');
+        
+        const newID = generateUUID();
+        
+        database[newID] = [{
+            type: 'CollectionEvent',
+            timestamp: new Date().toISOString(),
+            data: {
+                herbName,
+                quantity,
+                location,
+                collector: 'Farmer Cooperative B'
+            }
+        }];
+
+        productIDSpan.textContent = newID;
+        supplierOutput.classList.remove('hidden');
+        supplierForm.reset();
+        showMessage(supplierMessage, "New batch added successfully!", false);
+    });
+
+    copyBtn.addEventListener('click', () => {
+        const idToCopy = productIDSpan.textContent;
+        copyToClipboard(idToCopy);
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+        setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+        }, 2000);
+    });
+
+    // --- PROCESSOR/LAB LOGIC ---
+    const processorForm = document.getElementById('processorForm');
+    const eventTypeSelect = document.getElementById('eventType');
+    const processingFields = document.getElementById('processingFields');
+    const qualityFields = document.getElementById('qualityFields');
+    const processorMessage = document.getElementById('processorMessage');
+    const processorOutput = document.getElementById('processorOutput');
+    const processorProductIDSpan = document.getElementById('processorProductID');
+    const processorCopyBtn = document.getElementById('processorCopyBtn');
+
+    eventTypeSelect.addEventListener('change', (e) => {
+        if (e.target.value === 'ProcessingStep') {
+            processingFields.classList.remove('hidden');
+            qualityFields.classList.add('hidden');
+        } else {
+            processingFields.classList.add('hidden');
+            qualityFields.classList.remove('hidden');
+        }
+    });
+
+    processorForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const formData = new FormData(processorForm);
+        const productId = formData.get('processorID').trim().toUpperCase();
+
+        if (!database[productId]) {
+            showMessage(processorMessage, "Error: Product ID not found.", true);
+            processorOutput.classList.add('hidden');
+            return;
+        }
+
+        const eventType = formData.get('eventType');
+        let eventData = {};
+        
+        if (eventType === 'QualityTest') {
+            const moisture = parseFloat(formData.get('moisture'));
+            if (moisture > 8.0) {
+                showMessage(processorMessage, "Error: Moisture content exceeds threshold. Batch rejected.", true);
+                processorOutput.classList.add('hidden');
+                return;
+            }
+            eventData = {
+                lab: formData.get('lab'),
+                results: { moisture: ${moisture}% },
+                certificateID: CERT-${generateUUID().substring(5)}
+            };
+        } else {
+            eventData = {
+                step: formData.get('processingStep'),
+                facility: formData.get('facility')
+            };
+        }
+
+        database[productId].push({
+            type: eventType,
+            timestamp: new Date().toISOString(),
+            data: eventData
+        });
+        
+        processorProductIDSpan.textContent = productId;
+        processorOutput.classList.remove('hidden');
+        processorForm.reset();
+        showMessage(processorMessage, ${eventType.replace(/([A-Z])/g, ' $1')} added successfully!, false);
+    });
+
+    processorCopyBtn.addEventListener('click', () => {
+        const idToCopy = processorProductIDSpan.textContent;
+        copyToClipboard(idToCopy);
+        const originalText = processorCopyBtn.innerHTML;
+        copyBtn.innerHTML = '<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+        setTimeout(() => {
+            copyBtn.innerHTML = originalText;
+        }, 2000);
+    });
+
+    // --- CONSUMER LOGIC ---
+    const consumerIDInput = document.getElementById('consumerID');
+    const scanBtn = document.getElementById('scanBtn');
+    const consumerOutput = document.getElementById('consumerOutput');
+    const outputTitle = document.getElementById('outputTitle');
+    const provenanceHistoryDiv = document.getElementById('provenanceHistory');
+    const notFoundMessage = document.getElementById('notFoundMessage');
+    const qrcodeDiv = document.getElementById('qrcode');
+    const qrHelpText = document.getElementById('qrHelpText');
+
+    // This code now runs when the page loads, checking for a product ID in the URL.
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const productIdFromUrl = urlParams.get('id');
+        if (productIdFromUrl && database[productIdFromUrl]) {
+            generateCertificatePDF(productIdFromUrl);
+            document.body.innerHTML = `
+                <div class="flex items-center justify-center min-h-screen">
+                    <p class="text-center text-xl text-green-700">Certificate is being generated...</p>
+                </div>
+            `;
+        }
+    });
+
+    scanBtn.addEventListener('click', () => {
+        const productId = consumerIDInput.value.trim().toUpperCase();
+        if (database[productId]) {
+            displayProvenance(productId);
+            consumerOutput.classList.remove('hidden');
+            notFoundMessage.classList.add('hidden');
+        } else {
+            consumerOutput.classList.add('hidden');
+            notFoundMessage.classList.remove('hidden');
+        }
+    });
+
+    function displayProvenance(productId) {
+        const history = database[productId];
+        outputTitle.textContent = Provenance Record for ${history[0].data.herbName} (ID: ${productId});
+        provenanceHistoryDiv.innerHTML = '';
+        qrcodeDiv.innerHTML = '';
+        
+        history.forEach(event => {
+            const eventDiv = document.createElement('div');
+            let eventClass = '';
+            if (event.type === 'CollectionEvent') eventClass = 'event-collection';
+            else if (event.type === 'ProcessingStep') eventClass = 'event-processing';
+            else if (event.type === 'QualityTest') eventClass = 'event-quality-test';
+            else if (event.type === 'PackagingEvent') eventClass = 'event-packaging';
+            
+            eventDiv.className = provenance-event ${eventClass};
+            
+            let detailsHtml = '';
+            for (const key in event.data) {
+                let value = event.data[key];
+                if (key === 'results' && typeof value === 'object') {
+                    value = Object.entries(value).map(([resKey, resValue]) => 
+                        <li class="list-none"><span class="font-medium capitalize">${resKey.replace(/([A-Z])/g, ' $1').trim()}:</span> ${resValue}</li>).join('');
+                }
+                
+                detailsHtml += <li class="text-sm"><span class="font-medium capitalize text-gray-700">${key.replace(/([A-Z])/g, ' $1').trim()}:</span> ${value}</li>;
+            }
+            
+            let mapHtml = '';
+            if (event.type === 'CollectionEvent' && event.data.location) {
+                const locationQuery = encodeURIComponent(event.data.location);
+                mapHtml = <p class="mt-2"><a href="https://www.google.com/maps/place/${locationQuery}" target="_blank" class="text-blue-500 hover:underline text-sm font-medium">View Collection Location on Map</a></p>;
+            }
+
+            eventDiv.innerHTML = `
+                <h4 class="text-lg text-gray-800">${event.type.replace(/([A-Z])/g, ' $1')}</h4>
+                <p class="text-gray-500 text-xs mt-0.5">${formatDate(event.timestamp)}</p>
+                <ul class="list-disc list-inside mt-2 text-gray-600">
+                    ${detailsHtml}
+                </ul>
+                ${mapHtml}
+            `;
+            provenanceHistoryDiv.appendChild(eventDiv);
+        });
+        
+        generateCertificateQRCode(productId);
+        qrcodeDiv.classList.remove('hidden');
+        qrHelpText.classList.remove('hidden');
+    }
+
+    function generateCertificateQRCode(productId) {
+        // The QR code now points to the current file with a query parameter.
+        const certificateUrl = window.location.origin + window.location.pathname + '?id=' + productId;
+        const qr = qrcode(4, 'M');
+        qr.addData(certificateUrl);
+        qr.make();
+        const qrCodeImg = document.createElement('img');
+        qrCodeImg.src = qr.createDataURL();
+        qrcodeDiv.innerHTML = '';
+        qrcodeDiv.appendChild(qrCodeImg);
+    }
+
+
+    function generateCertificatePDF(productId) {
+        const history = database[productId];
+        if (!history) return;
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        let y = 20;
+        let pageHeight = doc.internal.pageSize.height;
+
+        // Find key data from history
+        const collectionEvent = history.find(e => e.type === 'CollectionEvent');
+        const qualityTestEvent = history.find(e => e.type === 'QualityTest');
+
+        // Certificate Header
+        doc.setFontSize(26);
+        doc.setFont(undefined, 'bold');
+        doc.text('Certificate of Originality', 105, y, null, null, 'center');
+        y += 15;
+
+        // Product Details
+        doc.setFontSize(14);
+        doc.setFont(undefined, 'normal');
+        doc.text(Product ID: ${productId}, 20, y);
+        y += 7;
+        doc.text(Herb Name: ${collectionEvent.data.herbName}, 20, y);
+        y += 7;
+        doc.text(Quantity: ${collectionEvent.data.quantity} kg, 20, y);
+        y += 20;
+
+        // Provenance Section
+        doc.setFontSize(18);
+        doc.setFont(undefined, 'bold');
+        doc.text('Provenance Details', 20, y);
+        y += 10;
+        
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
+        doc.text(•  Collection Location: ${collectionEvent.data.location}, 25, y);
+        y += 7;
+        doc.text(•  Collection Date: ${formatDate(collectionEvent.timestamp)}, 25, y);
+        y += 7;
+        doc.text(•  Quality Tested by: ${qualityTestEvent.data.lab}, 25, y);
+        y += 7;
+        doc.text(•  Moisture Content: ${qualityTestEvent.data.results.moisture}, 25, y);
+        y += 20;
+
+        // AYUSH Ministry Section
+        doc.setFontSize(18);
+        doc.setFont(undefined, 'bold');
+        doc.text('AYUSH Ministry Verification', 105, y, null, null, 'center');
+        y += 10;
+        
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'normal');
+        doc.text(This product has been inspected and verified for quality standards set by the Ministry of AYUSH., 105, y, null, null, 'center');
+        y += 10;
+        doc.text(Certificate No: ${qualityTestEvent.data.certificateID}, 105, y, null, null, 'center');
+        y += 20;
+
+        // Simulated Seal/Stamp (simple box for style)
+        let sealX = doc.internal.pageSize.width / 2 - 25;
+        let sealY = y;
+        doc.setDrawColor(0, 0, 0);
+        doc.rect(sealX, sealY, 50, 50);
+        doc.text('AYUSH', sealX + 25, sealY + 15, null, null, 'center');
+        doc.text('Verified', sealX + 25, sealY + 25, null, null, 'center');
+        doc.text('Seal', sealX + 25, sealY + 35, null, null, 'center');
+        y += 60;
+
+        // Final Statement
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.text('This certificate is digitally signed and verifiable on our blockchain network.', 105, pageHeight - 15, null, null, 'center');
+        
+        doc.save(AyurTrace_Certificate_${productId}.pdf);
+    }
+
+    // Optional: Pre-fill a sample ID for easy testing
+    window.onload = function() {
+        consumerIDInput.value = 'PROD-7A9B';
+    }
+</script>
+
+</body>
+</html>
