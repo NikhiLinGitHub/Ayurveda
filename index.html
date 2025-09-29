@@ -255,7 +255,7 @@
 
     // --- UTILITY FUNCTIONS ---
     function generateUUID() {
-        return `PROD-${Math.random().toString(16).substr(2, 4).toUpperCase()}`;
+        return PROD-${Math.random().toString(16).substr(2, 4).toUpperCase()};
     }
 
     function formatDate(isoString) {
@@ -365,8 +365,8 @@
             }
             eventData = {
                 lab: formData.get('lab'),
-                results: { moisture: `${moisture}%` },
-                certificateID: `CERT-${generateUUID().substring(5)}`
+                results: { moisture: ${moisture}% },
+                certificateID: CERT-${generateUUID().substring(5)}
             };
         } else {
             eventData = {
@@ -384,7 +384,7 @@
         processorProductIDSpan.textContent = productId;
         processorOutput.classList.remove('hidden');
         processorForm.reset();
-        showMessage(processorMessage, `${eventType.replace(/([A-Z])/g, ' $1')} added successfully!`, false);
+        showMessage(processorMessage, ${eventType.replace(/([A-Z])/g, ' $1')} added successfully!, false);
     });
 
     processorCopyBtn.addEventListener('click', () => {
@@ -469,7 +469,7 @@
 
     function displayProvenance(productId) {
         const history = database[productId];
-        outputTitle.textContent = `Provenance Record for ${history[0].data.herbName} (ID: ${productId})`;
+        outputTitle.textContent = Provenance Record for ${history[0].data.herbName} (ID: ${productId});
         provenanceHistoryDiv.innerHTML = '';
         qrcodeDiv.innerHTML = '';
         
@@ -482,7 +482,7 @@
             else if (event.type === 'ManufacturerTest') eventClass = 'event-manufacturer-test';
             else if (event.type === 'PackagingEvent') eventClass = 'event-packaging';
             
-            eventDiv.className = provenance-event `${eventClass}`;
+            eventDiv.className = provenance-event ${eventClass};
             
             let detailsHtml = '';
             for (const key in event.data) {
@@ -548,11 +548,11 @@
 
         doc.setFontSize(14);
         doc.setFont(undefined, 'normal');
-        doc.text(`Product ID: ${productId}`, 20, y);
+        doc.text(Product ID: ${productId}, 20, y);
         y += 7;
-        doc.text(`Herb Name: ${collectionEvent.data.herbName}`, 20, y);
+        doc.text(Herb Name: ${collectionEvent.data.herbName}, 20, y);
         y += 7;
-        doc.text(`Quantity: ${collectionEvent.data.quantity} kg`, 20, y);
+        doc.text(Quantity: ${collectionEvent.data.quantity} kg, 20, y);
         y += 20;
 
         doc.setFontSize(18);
@@ -562,18 +562,18 @@
         
         doc.setFontSize(12);
         doc.setFont(undefined, 'normal');
-        doc.text(`Collection Location: ${collectionEvent.data.location}`, 25, y);
+        doc.text(•  Collection Location: ${collectionEvent.data.location}, 25, y);
         y += 7;
-        doc.text(`Collection Date: ${formatDate(collectionEvent.timestamp)}`, 25, y);
+        doc.text(•  Collection Date: ${formatDate(collectionEvent.timestamp)}, 25, y);
         y += 7;
-        doc.text(`Quality Tested by: ${qualityTestEvent.data.lab}`, 25, y);
+        doc.text(•  Quality Tested by: ${qualityTestEvent.data.lab}, 25, y);
         y += 7;
-        doc.text(`Moisture Content: ${qualityTestEvent.data.results.moisture}`, 25, y);
+        doc.text(•  Moisture Content: ${qualityTestEvent.data.results.moisture}, 25, y);
         y += 7;
         if(manufacturerTestEvent) {
-            doc.text(`Heavy Metals Test: ${manufacturerTestEvent.data.heavyMetals}`, 25, y);
+            doc.text(•  Heavy Metals Test: ${manufacturerTestEvent.data.heavyMetals}, 25, y);
             y += 7;
-            doc.text(`Pesticides Test: ${manufacturerTestEvent.data.pesticides}`, 25, y);
+            doc.text(•  Pesticides Test: ${manufacturerTestEvent.data.pesticides}, 25, y);
             y += 7;
         }
         y += 13;
@@ -585,9 +585,9 @@
         
         doc.setFontSize(12);
         doc.setFont(undefined, 'normal');
-        doc.text(`This product has been inspected and verified for quality standards set by the Ministry of AYUSH.`, 105, y, null, null, 'center');
+        doc.text(This product has been inspected and verified for quality standards set by the Ministry of AYUSH., 105, y, null, null, 'center');
         y += 10;
-        doc.text(`Certificate No: ${qualityTestEvent.data.certificateID}`, 105, y, null, null, 'center');
+        doc.text(Certificate No: ${qualityTestEvent.data.certificateID}, 105, y, null, null, 'center');
         y += 20;
 
         let sealX = doc.internal.pageSize.width / 2 - 25;
@@ -603,7 +603,7 @@
         doc.setFont(undefined, 'normal');
         doc.text('This certificate is digitally signed and verifiable on our blockchain network.', 105, pageHeight - 15, null, null, 'center');
         
-        doc.save(AyurTrace_Certificate_`${productId}.pdf`);
+        doc.save(AyurTrace_Certificate_${productId}.pdf);
     }
 
     window.onload = function() {
