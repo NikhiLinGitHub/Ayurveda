@@ -51,17 +51,14 @@
             border-radius: 50%;
             border: 2px solid #ffffff;
         }
-        .provenance-event h4 {
-            font-weight: 600;
-            color: #2d3748;
-            margin-bottom: 0.25rem;
-        }
         .event-collection { border-color: #38a169; }
         .event-collection:before { background-color: #38a169; }
         .event-processing { border-color: #4299e1; }
         .event-processing:before { background-color: #4299e1; }
         .event-quality-test { border-color: #ed8936; }
         .event-quality-test:before { background-color: #ed8936; }
+        .event-manufacturer-test { border-color: #6366f1; }
+        .event-manufacturer-test:before { background-color: #6366f1; }
         .event-packaging { border-color: #c05621; }
         .event-packaging:before { background-color: #c05621; }
         #qrcode {
@@ -174,8 +171,41 @@
             <div id="processorMessage" class="mt-4 text-sm font-medium text-center hidden"></div>
         </div>
 
+        <div class="card">
+            <h2 class="section-title text-2xl">3. Manufacturer: Conduct Batch Testing</h2>
+            <form id="manufacturerForm" class="space-y-4">
+                <div>
+                    <label for="manufacturerID" class="block text-sm font-medium text-gray-700">Product ID</label>
+                    <input type="text" id="manufacturerID" name="manufacturerID" required placeholder="e.g., PROD-7A9B"
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="heavyMetals" class="block text-sm font-medium text-gray-700">Heavy Metals Test</label>
+                    <select id="heavyMetals" name="heavyMetals" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="Negative">Negative</option>
+                        <option value="Positive">Positive</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="pesticides" class="block text-sm font-medium text-gray-700">Pesticides Test</label>
+                    <select id="pesticides" name="pesticides" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        <option value="Negative">Negative</option>
+                        <option value="Positive">Positive</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                    Add Test Results
+                </button>
+            </form>
+            <div id="manufacturerOutput" class="mt-6 p-4 bg-gray-100 rounded-lg hidden">
+                <p class="text-sm font-medium text-gray-700">Manufacturer test results added for Product ID:</p>
+                <span id="manufacturerProductID" class="text-lg font-mono text-gray-900 bg-white p-2 rounded-md border border-gray-300 block mt-2"></span>
+            </div>
+            <div id="manufacturerMessage" class="mt-4 text-sm font-medium text-center hidden"></div>
+        </div>
+
         <div class="card lg:col-span-2">
-            <h2 class="section-title text-2xl">3. Consumer: View Provenance</h2>
+            <h2 class="section-title text-2xl">4. Consumer: View Provenance</h2>
             <div class="space-y-4">
                 <p class="text-sm text-gray-600">Enter a Product ID to view its complete provenance record.</p>
                 <div>
@@ -210,12 +240,14 @@
             { type: 'CollectionEvent', timestamp: new Date('2024-05-10T09:30:00Z').toISOString(), data: { herbName: 'Ashwagandha', quantity: 50, location: 'Satpura Hills, MP, India', collector: 'Farmer Cooperative A' }},
             { type: 'ProcessingStep', timestamp: new Date('2024-05-11T14:00:00Z').toISOString(), data: { step: 'Drying', facility: 'Shanti Herbal Processors' }},
             { type: 'QualityTest', timestamp: new Date('2024-05-15T11:00:00Z').toISOString(), data: { lab: 'Purity Labs', results: { moisture: '7%', pesticides: 'Negative' }, certificateID: 'CERT-001' }},
+            { type: 'ManufacturerTest', timestamp: new Date('2024-05-16T10:00:00Z').toISOString(), data: { heavyMetals: 'Negative', pesticides: 'Negative' }},
             { type: 'ProcessingStep', timestamp: new Date('2024-05-16T16:00:00Z').toISOString(), data: { step: 'Grinding and Packaging', facility: 'Shanti Herbal Processors' }},
             { type: 'PackagingEvent', timestamp: new Date('2024-05-17T10:00:00Z').toISOString(), data: { productBatch: 'ASH-2024-B1', qrCodeGenerated: true }},
         ],
         'PROD-C4D3': [
             { type: 'CollectionEvent', timestamp: new Date('2024-04-20T11:45:00Z').toISOString(), data: { herbName: 'Brahmi', quantity: 25, location: 'Western Ghats, Maharashtra, India', collector: 'Wild Collector Group' }},
             { type: 'QualityTest', timestamp: new Date('2024-04-25T09:00:00Z').toISOString(), data: { lab: 'PhytoVerify India', results: { dnaBarcode: '99% Match', heavyMetals: 'Negative' }, certificateID: 'CERT-002' }},
+            { type: 'ManufacturerTest', timestamp: new Date('2024-04-26T08:00:00Z').toISOString(), data: { heavyMetals: 'Negative', pesticides: 'Negative' }},
             { type: 'ProcessingStep', timestamp: new Date('2024-04-26T15:30:00Z').toISOString(), data: { step: 'Washing and Extraction', facility: 'AyurFormulations Co.' }},
             { type: 'PackagingEvent', timestamp: new Date('2024-04-28T14:00:00Z').toISOString(), data: { productBatch: 'BRM-2024-C3', qrCodeGenerated: true }},
         ]
@@ -223,7 +255,7 @@
 
     // --- UTILITY FUNCTIONS ---
     function generateUUID() {
-        return PROD-${Math.random().toString(16).substr(2, 4).toUpperCase()};
+        return `PROD-${Math.random().toString(16).substr(2, 4).toUpperCase()}`;
     }
 
     function formatDate(isoString) {
@@ -333,8 +365,8 @@
             }
             eventData = {
                 lab: formData.get('lab'),
-                results: { moisture: ${moisture}% },
-                certificateID: CERT-${generateUUID().substring(5)}
+                results: { moisture: `${moisture}%` },
+                certificateID: `CERT-${generateUUID().substring(5)}`
             };
         } else {
             eventData = {
@@ -352,7 +384,7 @@
         processorProductIDSpan.textContent = productId;
         processorOutput.classList.remove('hidden');
         processorForm.reset();
-        showMessage(processorMessage, ${eventType.replace(/([A-Z])/g, ' $1')} added successfully!, false);
+        showMessage(processorMessage, `${eventType.replace(/([A-Z])/g, ' $1')} added successfully!`, false);
     });
 
     processorCopyBtn.addEventListener('click', () => {
@@ -365,6 +397,41 @@
         }, 2000);
     });
 
+    // --- MANUFACTURER LOGIC ---
+    const manufacturerForm = document.getElementById('manufacturerForm');
+    const manufacturerMessage = document.getElementById('manufacturerMessage');
+    const manufacturerOutput = document.getElementById('manufacturerOutput');
+    const manufacturerProductIDSpan = document.getElementById('manufacturerProductID');
+
+    manufacturerForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const formData = new FormData(manufacturerForm);
+        const productId = formData.get('manufacturerID').trim().toUpperCase();
+
+        if (!database[productId]) {
+            showMessage(manufacturerMessage, "Error: Product ID not found.", true);
+            manufacturerOutput.classList.add('hidden');
+            return;
+        }
+
+        const heavyMetals = formData.get('heavyMetals');
+        const pesticides = formData.get('pesticides');
+
+        database[productId].push({
+            type: 'ManufacturerTest',
+            timestamp: new Date().toISOString(),
+            data: {
+                heavyMetals,
+                pesticides
+            }
+        });
+        
+        manufacturerProductIDSpan.textContent = productId;
+        manufacturerOutput.classList.remove('hidden');
+        manufacturerForm.reset();
+        showMessage(manufacturerMessage, "Manufacturer test results added successfully!", false);
+    });
+
     // --- CONSUMER LOGIC ---
     const consumerIDInput = document.getElementById('consumerID');
     const scanBtn = document.getElementById('scanBtn');
@@ -375,7 +442,6 @@
     const qrcodeDiv = document.getElementById('qrcode');
     const qrHelpText = document.getElementById('qrHelpText');
 
-    // This code now runs when the page loads, checking for a product ID in the URL.
     document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
         const productIdFromUrl = urlParams.get('id');
@@ -403,7 +469,7 @@
 
     function displayProvenance(productId) {
         const history = database[productId];
-        outputTitle.textContent = Provenance Record for ${history[0].data.herbName} (ID: ${productId});
+        outputTitle.textContent = `Provenance Record for ${history[0].data.herbName} (ID: ${productId})`;
         provenanceHistoryDiv.innerHTML = '';
         qrcodeDiv.innerHTML = '';
         
@@ -413,9 +479,10 @@
             if (event.type === 'CollectionEvent') eventClass = 'event-collection';
             else if (event.type === 'ProcessingStep') eventClass = 'event-processing';
             else if (event.type === 'QualityTest') eventClass = 'event-quality-test';
+            else if (event.type === 'ManufacturerTest') eventClass = 'event-manufacturer-test';
             else if (event.type === 'PackagingEvent') eventClass = 'event-packaging';
             
-            eventDiv.className = provenance-event ${eventClass};
+            eventDiv.className = provenance-event `${eventClass}`;
             
             let detailsHtml = '';
             for (const key in event.data) {
@@ -431,7 +498,7 @@
             let mapHtml = '';
             if (event.type === 'CollectionEvent' && event.data.location) {
                 const locationQuery = encodeURIComponent(event.data.location);
-                mapHtml = <p class="mt-2"><a href="https://www.google.com/maps/place/${locationQuery}" target="_blank" class="text-blue-500 hover:underline text-sm font-medium">View Collection Location on Map</a></p>;
+                mapHtml = <p class="mt-2"><a href="https://maps.google.com/?q=${locationQuery}" target="_blank" class="text-blue-500 hover:underline text-sm font-medium">View Collection Location on Map</a></p>;
             }
 
             eventDiv.innerHTML = `
@@ -451,7 +518,6 @@
     }
 
     function generateCertificateQRCode(productId) {
-        // The QR code now points to the current file with a query parameter.
         const certificateUrl = window.location.origin + window.location.pathname + '?id=' + productId;
         const qr = qrcode(4, 'M');
         qr.addData(certificateUrl);
@@ -462,7 +528,6 @@
         qrcodeDiv.appendChild(qrCodeImg);
     }
 
-
     function generateCertificatePDF(productId) {
         const history = database[productId];
         if (!history) return;
@@ -472,27 +537,24 @@
         let y = 20;
         let pageHeight = doc.internal.pageSize.height;
 
-        // Find key data from history
         const collectionEvent = history.find(e => e.type === 'CollectionEvent');
         const qualityTestEvent = history.find(e => e.type === 'QualityTest');
+        const manufacturerTestEvent = history.find(e => e.type === 'ManufacturerTest');
 
-        // Certificate Header
         doc.setFontSize(26);
         doc.setFont(undefined, 'bold');
         doc.text('Certificate of Originality', 105, y, null, null, 'center');
         y += 15;
 
-        // Product Details
         doc.setFontSize(14);
         doc.setFont(undefined, 'normal');
-        doc.text(Product ID: ${productId}, 20, y);
+        doc.text(`Product ID: ${productId}`, 20, y);
         y += 7;
-        doc.text(Herb Name: ${collectionEvent.data.herbName}, 20, y);
+        doc.text(`Herb Name: ${collectionEvent.data.herbName}`, 20, y);
         y += 7;
-        doc.text(Quantity: ${collectionEvent.data.quantity} kg, 20, y);
+        doc.text(`Quantity: ${collectionEvent.data.quantity} kg`, 20, y);
         y += 20;
 
-        // Provenance Section
         doc.setFontSize(18);
         doc.setFont(undefined, 'bold');
         doc.text('Provenance Details', 20, y);
@@ -500,16 +562,22 @@
         
         doc.setFontSize(12);
         doc.setFont(undefined, 'normal');
-        doc.text(•  Collection Location: ${collectionEvent.data.location}, 25, y);
+        doc.text(`Collection Location: ${collectionEvent.data.location}`, 25, y);
         y += 7;
-        doc.text(•  Collection Date: ${formatDate(collectionEvent.timestamp)}, 25, y);
+        doc.text(`Collection Date: ${formatDate(collectionEvent.timestamp)}`, 25, y);
         y += 7;
-        doc.text(•  Quality Tested by: ${qualityTestEvent.data.lab}, 25, y);
+        doc.text(`Quality Tested by: ${qualityTestEvent.data.lab}`, 25, y);
         y += 7;
-        doc.text(•  Moisture Content: ${qualityTestEvent.data.results.moisture}, 25, y);
-        y += 20;
+        doc.text(`Moisture Content: ${qualityTestEvent.data.results.moisture}`, 25, y);
+        y += 7;
+        if(manufacturerTestEvent) {
+            doc.text(`Heavy Metals Test: ${manufacturerTestEvent.data.heavyMetals}`, 25, y);
+            y += 7;
+            doc.text(`Pesticides Test: ${manufacturerTestEvent.data.pesticides}`, 25, y);
+            y += 7;
+        }
+        y += 13;
 
-        // AYUSH Ministry Section
         doc.setFontSize(18);
         doc.setFont(undefined, 'bold');
         doc.text('AYUSH Ministry Verification', 105, y, null, null, 'center');
@@ -517,12 +585,11 @@
         
         doc.setFontSize(12);
         doc.setFont(undefined, 'normal');
-        doc.text(This product has been inspected and verified for quality standards set by the Ministry of AYUSH., 105, y, null, null, 'center');
+        doc.text(`This product has been inspected and verified for quality standards set by the Ministry of AYUSH.`, 105, y, null, null, 'center');
         y += 10;
-        doc.text(Certificate No: ${qualityTestEvent.data.certificateID}, 105, y, null, null, 'center');
+        doc.text(`Certificate No: ${qualityTestEvent.data.certificateID}`, 105, y, null, null, 'center');
         y += 20;
 
-        // Simulated Seal/Stamp (simple box for style)
         let sealX = doc.internal.pageSize.width / 2 - 25;
         let sealY = y;
         doc.setDrawColor(0, 0, 0);
@@ -532,15 +599,13 @@
         doc.text('Seal', sealX + 25, sealY + 35, null, null, 'center');
         y += 60;
 
-        // Final Statement
         doc.setFontSize(10);
         doc.setFont(undefined, 'normal');
         doc.text('This certificate is digitally signed and verifiable on our blockchain network.', 105, pageHeight - 15, null, null, 'center');
         
-        doc.save(AyurTrace_Certificate_${productId}.pdf);
+        doc.save(AyurTrace_Certificate_`${productId}.pdf`);
     }
 
-    // Optional: Pre-fill a sample ID for easy testing
     window.onload = function() {
         consumerIDInput.value = 'PROD-7A9B';
     }
